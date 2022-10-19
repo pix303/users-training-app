@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -34,45 +34,103 @@ type User struct {
 	} `json:"company"`
 }
 
+// users rappresents data to search
 var users []User
 
+// errors constants
+const (
+	ERROR_LOADING_DATA           = "error on load data"
+	ERROR_PARSING_DATA           = "error on parsing json data"
+	ERROR_PARAMETER              = "parameter not allowed"
+	ERROR_USER_NOT_FOUND         = "user not found"
+	ERROR_USER_NOT_TRANSFORMABLE = "user cant be transformed in json"
+)
+
+// init load and prepare data
 func init() {
-	log.Println("init data")
+	log.Println("init data...")
 	rawData, err := ioutil.ReadFile("users.json")
 	if err != nil {
-		log.Fatalf("Error init data to search: %v", err)
+		log.Fatalf("%s %v", ERROR_LOADING_DATA, err)
 	}
 
 	err = json.Unmarshal(rawData, &users)
 	if err != nil {
-		log.Fatalf("Error unmarshal data to search: %v", err)
+		log.Fatalf("%s %v", ERROR_PARSING_DATA, err)
 	}
+	log.Printf("data loaded: %d users", len(users))
 }
 
-func searchUser(rw http.ResponseWriter, r *http.Request) {
+// welcomeHandler give a feedback and welcome
+func welcomeHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Write([]byte("Welcome to search user server with search endpoint"))
+}
+
+// searchUserHandler handles request for searching user by name
+func searchUserHandler(rw http.ResponseWriter, r *http.Request) {
 	queries := r.URL.Query()
-	for k := range queries {
-		log.Print(fmt.Sprintf("chiave: %s = %v", k, queries.Get(k)))
+
+	if searchName := queries.Get("name"); searchName == "" {
+		http.Error(rw, ERROR_PARAMETER, http.StatusBadRequest)
+		return
 	}
 
 	var candidate User
+	var candidateFounded = false
 	for _, candidate = range users {
-		if strings.Contains(candidate.Name, queries.Get("name")) {
+		if strings.Contains(strings.ToLower(candidate.Name), strings.ToLower(queries.Get("name"))) {
+			candidateFounded = true
 			break
 		}
 	}
 
-	log.Print(rw.Write([]byte(fmt.Sprintf("hello you are searching for: %s\n\n", queries.Get("name")))))
+	if !candidateFounded {
+		http.Error(rw, ERROR_USER_NOT_FOUND, http.StatusNoContent)
+		return
+	}
 
 	result, err := json.Marshal(&candidate)
 	if err != nil {
-		http.Error(rw, "Error on parsing json", http.StatusInternalServerError)
+		http.Error(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
 	}
 	rw.Write(result)
 }
 
+// userHandler return user by id
+func userHandler(rw http.ResponseWriter, r *http.Request) {
+	pathParts := strings.Split(r.URL.Path, "/")
+	id, err := strconv.Atoi(pathParts[len(pathParts)-1])
+	if err != nil {
+		http.Error(rw, ERROR_PARAMETER, http.StatusBadRequest)
+	}
+
+	var candidate User
+	var candidateFounded = false
+	for _, candidate = range users {
+		if candidate.ID == id {
+			candidateFounded = true
+			break
+		}
+	}
+
+	if !candidateFounded {
+		http.Error(rw, ERROR_USER_NOT_FOUND, http.StatusNoContent)
+		return
+	}
+
+	result, err := json.Marshal(&candidate)
+	if err != nil {
+		http.Error(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
+		return
+	}
+
+	rw.Write(result)
+}
+
 func main() {
-	http.HandleFunc("/search", searchUser)
+	http.HandleFunc("/", welcomeHandler)
+	http.HandleFunc("/search", searchUserHandler)
+	http.HandleFunc("/user/", userHandler)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
