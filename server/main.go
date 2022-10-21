@@ -127,10 +127,21 @@ func userHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(result)
 }
 
+func usersHandler(rw http.ResponseWriter, r *http.Request) {
+	result, err := json.Marshal(&users)
+	if err != nil {
+		http.Error(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
+		return
+	}
+
+	rw.Write(result)
+}
+
 func main() {
 	http.HandleFunc("/", welcomeHandler)
 	http.HandleFunc("/search", searchUserHandler)
-	http.HandleFunc("/user/", userHandler)
+	http.HandleFunc("/users/", userHandler)
+	http.HandleFunc("/users", usersHandler)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
