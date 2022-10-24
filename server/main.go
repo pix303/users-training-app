@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -49,7 +49,7 @@ const (
 // init load and prepare data
 func init() {
 	log.Println("init data...")
-	rawData, err := ioutil.ReadFile("users.json")
+	rawData, err := os.ReadFile("users.json")
 	if err != nil {
 		log.Fatalf("%s %v", ERROR_LOADING_DATA, err)
 	}
@@ -66,6 +66,11 @@ func welcomeHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Write([]byte("Welcome to search user server with search endpoint"))
 }
 
+func setHeaders(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	(*w).Header().Set("Content-Type", "application/json")
+}
+
 // searchUserHandler handles request for searching user by name
 func searchUserHandler(rw http.ResponseWriter, r *http.Request) {
 	queries := r.URL.Query()
@@ -75,24 +80,19 @@ func searchUserHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var candidate User
-	var candidateFounded = false
-	for _, candidate = range users {
+	var candidates []User = make([]User, 0)
+	for _, candidate := range users {
 		if strings.Contains(strings.ToLower(candidate.Name), strings.ToLower(queries.Get("name"))) {
-			candidateFounded = true
-			break
+			candidates = append(candidates, candidate)
 		}
 	}
 
-	if !candidateFounded {
-		http.Error(rw, ERROR_USER_NOT_FOUND, http.StatusNoContent)
-		return
-	}
-
-	result, err := json.Marshal(&candidate)
+	setHeaders(&rw)
+	result, err := json.Marshal(&candidates)
 	if err != nil {
 		http.Error(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
 	}
+
 	rw.Write(result)
 }
 
@@ -113,6 +113,8 @@ func userHandler(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	setHeaders(&rw)
+
 	if !candidateFounded {
 		http.Error(rw, ERROR_USER_NOT_FOUND, http.StatusNoContent)
 		return
@@ -128,6 +130,7 @@ func userHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func usersHandler(rw http.ResponseWriter, r *http.Request) {
+	setHeaders(&rw)
 	result, err := json.Marshal(&users)
 	if err != nil {
 		http.Error(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
@@ -139,7 +142,7 @@ func usersHandler(rw http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", welcomeHandler)
-	http.HandleFunc("/search", searchUserHandler)
+	http.HandleFunc("/users/search", searchUserHandler)
 	http.HandleFunc("/users/", userHandler)
 	http.HandleFunc("/users", usersHandler)
 

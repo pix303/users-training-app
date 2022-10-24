@@ -3,11 +3,14 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
-  content: ["./src/**/*.{html,ts,tsx}"],
+    content: [
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     extend: {
       fontFamily:{
-        'sans': ['Jockerman', ...defaultTheme.fontFamily.sans]
+        'sans': ['Fira Sans', ...defaultTheme.fontFamily.mono]
       }
     },
   },
