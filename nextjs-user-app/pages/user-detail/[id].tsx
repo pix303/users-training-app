@@ -18,7 +18,7 @@ const UserDetail: NextPage<UserDetailProps> = (props: UserDetailProps) => {
         case StatusOptions.SUCCESS:
             return <p>{props.user.name}</p>
         case StatusOptions.ERROR:
-            return <ErrorMessage message={props.errorMessage} info="test test test" />
+            return <ErrorMessage message={props.errorMessage} />
     }
 }
 
