@@ -93,6 +93,8 @@ func searchUserHandler(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
 	}
 
+	log.Printf("Num items found: %d\r", len(candidates))
+
 	rw.Write(result)
 }
 
