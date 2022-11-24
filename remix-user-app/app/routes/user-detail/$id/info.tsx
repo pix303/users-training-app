@@ -1,22 +1,35 @@
 import { json } from "@remix-run/node";
 import type { LoaderArgs, TypedResponse } from "@remix-run/node";
-import { Outlet, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import type { User } from "~/model/user";
+import { getUser } from "~/model/user.server";
 
 export async function loader({ params }: LoaderArgs): Promise<TypedResponse<User>> {
-    const id = params.id;
-    const response = await fetch(`${process.env.BACKEND_URL}/users/${id}`);
+    const id = params.id ?? "";
     return json(
-        await response.json(),
+        await getUser(id)
     )
 }
 
-export default function UserInfo() {
-    const data = useLoaderData<typeof loader>();
+export default function InfoView() {
+
+    const user = useLoaderData<User>()
 
     return (
         <div>
-            {data.name}
+            <h2>Info</h2>
+            <table className="table w-52">
+                <tbody>
+                    <tr>
+                        <th>Name</th>
+                        <td>{user?.name}</td>
+                    </tr>
+                    <tr>
+                        <th>Username</th>
+                        <td>{user.username}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     );
 }

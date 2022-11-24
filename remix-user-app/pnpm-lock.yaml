@@ -9,6 +9,7 @@ specifiers:
   '@types/react': ^18.0.15
   '@types/react-dom': ^18.0.6
   autoprefixer: ^10.4.13
+  classnames: ^2.3.2
   concurrently: ^7.5.0
   daisyui: ^2.39.0
   eslint: ^8.23.1
@@ -24,6 +25,7 @@ dependencies:
   '@remix-run/node': 1.7.5_biqbaboplfbrettd7655fr4n2y
   '@remix-run/react': 1.7.5_biqbaboplfbrettd7655fr4n2y
   '@remix-run/serve': 1.7.5_biqbaboplfbrettd7655fr4n2y
+  classnames: 2.3.2
   daisyui: 2.39.0_2lwn2upnx27dqeg6hqdu7sq75m
   isbot: 3.6.5
   react: 18.2.0
@@ -2620,6 +2622,10 @@ packages:
       isobject: 3.0.1
       static-extend: 0.1.2
     dev: true
+
+  /classnames/2.3.2:
+    resolution: {integrity: sha512-CSbhY4cFEJRe6/GQzIk5qXZ4Jeg5pcsP7b5peFSDpffpe1cqjASH/n9UTjBwOp6XpMSTwQ8Za2K5V02ueA7Tmw==}
+    dev: false
 
   /clean-stack/2.2.0:
     resolution: {integrity: sha512-4diC9HaTE+KRAMWhDhrGOECgWZxoevMc5TlkObMqNSsVU62PYzXZ/SMTjzyGAFF1YusgxGcSWTEXBhp0CPwQ1A==}

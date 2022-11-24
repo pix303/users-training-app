@@ -4,10 +4,6 @@
 
 @layer base{
 
-  body{
-    @apply font-sans
-  }
-
   h1{
     @apply text-3xl my-3
   }
@@ -20,3 +16,29 @@
     @apply text-xl my-1
   }
 }
+
+
+.btn{
+  @apply px-6
+}
+
+div.form-control{
+  @apply my-2 
+}
+
+div.form-control-btn{
+  @apply my-2 flex justify-end gap-2
+}
+
+label.input-group > span{
+  @apply text-slate-500 bg-slate-300 w-2/6 text-ellipsis
+}
+
+label.input-group > input{
+  @apply w-4/6 border-2
+}
+
+input:invalid{
+  @apply border-red-600
+}
+
