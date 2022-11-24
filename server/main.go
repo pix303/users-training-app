@@ -2,11 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/gorilla/schema"
+	"github.com/jinzhu/copier"
 )
 
 // User write down thanks to https://mholt.github.io/json-to-go/
@@ -45,6 +49,11 @@ const (
 	ERROR_USER_NOT_FOUND         = "user not found"
 	ERROR_USER_NOT_TRANSFORMABLE = "user cant be transformed in json"
 )
+
+type UserResponse struct {
+	Message string `json:"message"`
+	Value   string `json:"value"`
+}
 
 // init load and prepare data
 func init() {
@@ -128,6 +137,8 @@ func userHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//log.Println(string(result))
+
 	rw.Write(result)
 }
 
@@ -142,11 +153,57 @@ func usersHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(result)
 }
 
+func addUserHandler(rw http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "POST" {
+		http.Error(rw, "Not allowed method", http.StatusMethodNotAllowed)
+		return
+	}
+	err := r.ParseMultipartForm(0)
+	if err != nil {
+		http.Error(rw, fmt.Sprintf("error on parse data: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	var decoder = schema.NewDecoder()
+	var user User
+	decoder.Decode(&user, r.PostForm)
+
+	var ur UserResponse
+
+	if r.FormValue("id") != "" {
+		user.ID, _ = strconv.Atoi(r.FormValue("id"))
+		for k := range users {
+			u := &users[k]
+			if u.ID == user.ID {
+				copier.Copy(&u, &user)
+				ur.Message = "User updated"
+				ur.Value = strconv.Itoa(user.ID)
+				break
+			}
+		}
+	} else {
+		user.ID = len(users) + 1
+		users = append(users, user)
+		ur.Message = "User added"
+		ur.Value = strconv.Itoa(user.ID)
+	}
+
+	urBody, err := json.Marshal(&ur)
+	if err != nil {
+		http.Error(rw, fmt.Sprintf("error on marshall data response: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	rw.Write(urBody)
+}
+
 func main() {
 	http.HandleFunc("/", welcomeHandler)
 	http.HandleFunc("/users/search", searchUserHandler)
 	http.HandleFunc("/users/", userHandler)
 	http.HandleFunc("/users", usersHandler)
+	http.HandleFunc("/user/add", addUserHandler)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
