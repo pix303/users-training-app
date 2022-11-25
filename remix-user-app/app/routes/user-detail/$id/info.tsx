@@ -17,7 +17,6 @@ export default function InfoView() {
 
     return (
         <div>
-            <h2>Info</h2>
             <table className="table w-52">
                 <tbody>
                     <tr>

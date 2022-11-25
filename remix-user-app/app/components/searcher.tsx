@@ -1,5 +1,6 @@
 import { useNavigate, useSearchParams } from "@remix-run/react";
-import { ChangeEvent, useCallback } from "react";
+import type { ChangeEvent } from "react";
+import { useCallback } from "react";
 
 export default function Searcher() {
 
@@ -10,9 +11,8 @@ export default function Searcher() {
         const candidateValue = e.target.value;
         const name = encodeURI(candidateValue);
 
-        if (location.pathname !== "/") {
-            navigate("/");
-            setSearchParams({ name });
+        if (location.pathname.length > 1) {
+            navigate("/?name=" + name);
             return
         }
 
@@ -23,7 +23,7 @@ export default function Searcher() {
 
         setSearchParams({ name });
 
-    }, [searchParams]);
+    }, [searchParams, navigate]);
 
     return (
         <div className="h-full">

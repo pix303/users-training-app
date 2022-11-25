@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import type { LoaderArgs, TypedResponse } from "@remix-run/node";
-import { Link, NavLink, Outlet, useCatch, useLoaderData, useParams } from "@remix-run/react";
+import { Link, Outlet, useCatch, useLoaderData, useParams } from "@remix-run/react";
 import type { User } from "~/model/user";
 import NavTabLink from "~/components/nav-tab-link";
 import { getUser } from "~/model/user.server";
@@ -25,7 +25,10 @@ export default function UserDetail() {
     return (
         <section>
             <header>
-                <h1>{data.name}</h1>
+                <h1>
+                    <span className="mr-4">{data.name}</span>
+                    <Link to={`/user-detail-edit/${id}`} className="btn btn-sm">Edit</Link>
+                </h1>
             </header>
             <nav>
                 <div className="tabs">

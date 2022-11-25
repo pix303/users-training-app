@@ -27,14 +27,14 @@ const UserPresenter: FunctionComponent<UserPresenterProps> = ({ user }) => {
             <li
                 key={user.id}
                 onMouseOver={showInfoDetail}
-                title={infoDetail}
                 className="block p-6 border-slate-200 border-solid border-2 rounded w-72 h-auto hover:bg-slate-100"
             >
                 {
-                    errorFetchInfoDetail ? <span className="text-red-600">{errorFetchInfoDetail}</span> : user.name
+                    errorFetchInfoDetail ? <p><span className="text-red-600">{errorFetchInfoDetail}</span></p> : <p>{user.name}</p>
                 }
+                <p className="text-sm">{infoDetail || "?"}</p>
             </li>
-        </Link>
+        </Link >
     )
 }
 

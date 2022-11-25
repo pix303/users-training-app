@@ -34,7 +34,6 @@ export async function addUser(d: FormData): Promise<UserResponse | any> {
             {
                 body: d,
                 method: "POST",
-                //headers: { "Content-Type": "multipart/form-data" }
             });
         return r.json();
     } catch (error: any) {
