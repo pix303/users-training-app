@@ -153,12 +153,18 @@ func usersHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(result)
 }
 
-func addUserHandler(rw http.ResponseWriter, r *http.Request) {
+func singleUserHandler(rw http.ResponseWriter, r *http.Request) {
+
+	if r.Method == "DELETE" {
+		http.Error(rw, "Method not yet implemented", http.StatusNotImplemented)
+		return
+	}
 
 	if r.Method != "POST" {
 		http.Error(rw, "Not allowed method", http.StatusMethodNotAllowed)
 		return
 	}
+
 	err := r.ParseMultipartForm(0)
 	if err != nil {
 		http.Error(rw, fmt.Sprintf("error on parse data: %s", err.Error()), http.StatusBadRequest)
@@ -203,7 +209,7 @@ func main() {
 	http.HandleFunc("/users/search", searchUserHandler)
 	http.HandleFunc("/users/", userHandler)
 	http.HandleFunc("/users", usersHandler)
-	http.HandleFunc("/user/add", addUserHandler)
+	http.HandleFunc("/user", singleUserHandler)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
