@@ -1,25 +1,36 @@
 # users-training-app
 
-Training projext to evaluate Nextjs and Remix
+Training projext to evaluate Nextjs (ver 12 and 13) and Remix
 
 ## server
 Go minimal rest api for serving users data
-- /users: list all users (about 10)
-- /users/$id: get single user by id
-- /users/search?name=something: filter users by name
+- `GET: /users`: list all users (about 10)
+- `GET: /users/$id`: get single user by id
+- `GET: /users/search?name=something`: filter users by name
+- `POST: /user`: add or update user
+- `DELETE: /user`: not yet implemented
 
 TODO: 
-- minimal model in users resource
+- minimal model in users list endpoint
 - cors by lib
 
+
+## User app
+Apps implemented with different framework for presenting users with filter by name, user detail and form to update or insert user
+
 ## nextjs-user-app
-App for presenting users with filter name and single user detail
+App implemented with **Nextjs 12**
+
+TODO:
+- complete user detail view
+- add/update view
+
+## nextjs13-user-app
+App implemented with **Nextjs 13**
 
 TODO:
 - user detail view
-- better user list item + client request data
+- add/update user
 
 ## remix-user-app
-
-TODO:
-- all
+ App implemented with **Remix**
