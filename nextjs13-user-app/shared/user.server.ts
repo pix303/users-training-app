@@ -9,12 +9,12 @@ export const getUserDetail = (id: string | undefined): Promise<User> => {
 }
 
 
-export async function addUser(data: any): Promise<UserResponse> {
+export async function addUser(data: User): Promise<UserResponse> {
 
     //TODO: fix type prop when not string
-    if ("id" in data) {
-        data.id = parseInt(data.id)
-    }
+    // if ("id" in data) {
+    //     data.id = parseInt(data.id)
+    // }
 
     try {
         const r = await fetch(
@@ -27,21 +27,20 @@ export async function addUser(data: any): Promise<UserResponse> {
 
         if (r.status < 400) {
             return r.json().then(data => {
-                console.log("-----------------------------------------------");
-                console.log(r.status)
-                console.log(r.statusText)
-                console.log(data)
-                console.log("-----------------------------------------------");
-
-                return data;
+                let dataResult: UserResponse = { isError: false };
+                dataResult = { ...dataResult, ...data };
+                return dataResult;
             })
         } else {
             const msg = await r.json();
-            throw new Error(`Server error on add user: ${r.status} - ${r.statusText}:  ${msg.message}`)
+            let errorResult: UserResponse = { isError: true };
+            errorResult = { ...errorResult, ...msg };
+            return errorResult;
         }
 
     } catch (error: any) {
-        throw new Error("Error on add user: " + error.toString())
+        let errorResult: UserResponse = { isError: true, message: "Error on add user: " + error.toString() };
+        return errorResult;
     }
 
 }

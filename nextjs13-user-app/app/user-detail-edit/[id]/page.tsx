@@ -1,3 +1,4 @@
+import ToastMessage from "../../../components/toast-message";
 import { User } from "../../../shared/model/user";
 import { getUserDetail } from "../../../shared/user.server";
 
@@ -6,9 +7,13 @@ export function getUser(id: string): Promise<User> {
     return getUserDetail(id);
 }
 
-export default async function UserEditView({ params }: { params: { id: string } }) {
+export default async function UserEditView({ params, searchParams }: { params: { id: string }, searchParams: { error: string } }) {
 
     const user = await getUser(params.id);
+    const errMessage = searchParams.error;
+    console.log("errMessage", errMessage);
+
+
 
     return (
         <section>
@@ -16,7 +21,7 @@ export default async function UserEditView({ params }: { params: { id: string } 
                 <h1>Create new user</h1>
             </header>
             <div className="my-10 grid gap-1 w-3/6">
-                <form method="post" action="/api/add-user">
+                <form method="post" action={`/api/add-user`}>
 
                     <div className="form-control">
                         <label className="input-group">
@@ -53,6 +58,8 @@ export default async function UserEditView({ params }: { params: { id: string } 
                     </div>
                 </form>
             </div>
+
+            <ToastMessage message={errMessage} show={Boolean(errMessage)} level="error" />
 
         </section >
     );
