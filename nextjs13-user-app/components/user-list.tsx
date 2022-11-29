@@ -1,7 +1,7 @@
 'use client'
 
 import { FunctionComponent, useEffect, useState } from "react";
-import { User } from "../shared/user";
+import { User } from "../shared/model/user";
 import UserPresenter from "./user-list-item";
 
 type UserListProps = {
