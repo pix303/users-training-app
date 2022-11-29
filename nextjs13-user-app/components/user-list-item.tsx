@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FunctionComponent, useCallback, useState } from "react"
-import { User } from "../shared/user";
+import { User } from "../shared/model/user";
 
 type UserPresenterProps = {
     user: User;
@@ -22,16 +22,16 @@ const UserPresenter: FunctionComponent<UserPresenterProps> = ({ user }) => {
     }, [user, infoDetail]);
 
     return (
-        <Link href={`/user-detail/${user.id}`}>
+        <Link href={`/user-detail/${user.id}/info`}>
             <li
                 key={user.id}
                 onMouseOver={showInfoDetail}
-                title={infoDetail}
                 className="block p-6 border-slate-200 border-solid border-2 rounded w-72 h-auto hover:bg-slate-100"
             >
                 {
-                    errorFetchInfoDetail ? <span className="text-red-600">{errorFetchInfoDetail}</span> : user.name
+                    errorFetchInfoDetail ? <p><span className="text-red-600">{errorFetchInfoDetail}</span></p> : <p>{user.name}</p>
                 }
+                <p className="text-sm">{infoDetail || "?"}</p>
             </li>
         </Link>
     )

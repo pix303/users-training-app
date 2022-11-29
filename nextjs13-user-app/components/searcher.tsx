@@ -11,8 +11,6 @@ export default function Searcher() {
 
 
     const searchHandler = useCallback((e: ChangeEvent<HTMLInputElement>): void => {
-        console.log(router);
-
         if (!router) return;
 
         const candidateValue = e.target.value;

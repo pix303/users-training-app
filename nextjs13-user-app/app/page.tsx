@@ -1,9 +1,8 @@
-
-import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import ErrorMessage from '../components/error-message';
 import UserList from '../components/user-list';
-import { StatusOptions } from '../shared/status-type';
-import { User } from '../shared/user';
+import { StatusOptions } from '../shared/model/status-type';
+import type { User } from '../shared/model/user';
 
 type HomeProps = {
   status: StatusOptions.SUCCESS;
@@ -47,13 +46,15 @@ export default async function Page({ searchParams }: { searchParams: { name: str
 
   switch (props.status) {
     case StatusOptions.SUCCESS:
-      return <UserList users={props.users} searchName={props.filteredName} />
+      return (
+        <UserList users={props.users} searchName={props.filteredName} />
+      )
 
     case StatusOptions.ERROR:
       return <ErrorMessage message={props.error} />
 
     default:
-      return <p>nothing</p>
+      return <p>nothing else matter</p>
   }
 }
 

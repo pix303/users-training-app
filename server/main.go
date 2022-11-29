@@ -55,6 +55,11 @@ type UserResponse struct {
 	Value   string `json:"value"`
 }
 
+type ErrorResponse struct {
+	Message string `json:"message"`
+	Value   string `json:"value"`
+}
+
 // init load and prepare data
 func init() {
 	log.Println("init data...")
@@ -80,12 +85,24 @@ func setHeaders(w *http.ResponseWriter) {
 	(*w).Header().Set("Content-Type", "application/json")
 }
 
+func manageError(rw http.ResponseWriter, msg string, status int) {
+	var errorResponse ErrorResponse
+	errorResponse.Message = msg
+
+	errorResponseData, err := json.Marshal(errorResponse)
+	if err != nil {
+		manageError(rw, "{ message: 'error build error message', value: ''}", http.StatusInternalServerError)
+	}
+
+	http.Error(rw, string(errorResponseData), status)
+}
+
 // searchUserHandler handles request for searching user by name
 func searchUserHandler(rw http.ResponseWriter, r *http.Request) {
 	queries := r.URL.Query()
 
 	if searchName := queries.Get("name"); searchName == "" {
-		http.Error(rw, ERROR_PARAMETER, http.StatusBadRequest)
+		manageError(rw, ERROR_PARAMETER, http.StatusBadRequest)
 		return
 	}
 
@@ -99,7 +116,8 @@ func searchUserHandler(rw http.ResponseWriter, r *http.Request) {
 	setHeaders(&rw)
 	result, err := json.Marshal(&candidates)
 	if err != nil {
-		http.Error(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
+		manageError(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
+
 	}
 
 	log.Printf("Num items found: %d\r", len(candidates))
@@ -112,7 +130,7 @@ func userHandler(rw http.ResponseWriter, r *http.Request) {
 	pathParts := strings.Split(r.URL.Path, "/")
 	id, err := strconv.Atoi(pathParts[len(pathParts)-1])
 	if err != nil {
-		http.Error(rw, ERROR_PARAMETER, http.StatusBadRequest)
+		manageError(rw, ERROR_PARAMETER, http.StatusBadRequest)
 	}
 
 	var candidate User
@@ -127,13 +145,13 @@ func userHandler(rw http.ResponseWriter, r *http.Request) {
 	setHeaders(&rw)
 
 	if !candidateFounded {
-		http.Error(rw, ERROR_USER_NOT_FOUND, http.StatusNoContent)
+		manageError(rw, ERROR_USER_NOT_FOUND, http.StatusNotFound)
 		return
 	}
 
 	result, err := json.Marshal(&candidate)
 	if err != nil {
-		http.Error(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
+		manageError(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
 		return
 	}
 
@@ -146,7 +164,7 @@ func usersHandler(rw http.ResponseWriter, r *http.Request) {
 	setHeaders(&rw)
 	result, err := json.Marshal(&users)
 	if err != nil {
-		http.Error(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
+		manageError(rw, ERROR_USER_NOT_TRANSFORMABLE, http.StatusInternalServerError)
 		return
 	}
 
@@ -154,31 +172,45 @@ func usersHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func singleUserHandler(rw http.ResponseWriter, r *http.Request) {
-
 	if r.Method == "DELETE" {
-		http.Error(rw, "Method not yet implemented", http.StatusNotImplemented)
+		manageError(rw, "Method not yet implemented", http.StatusNotImplemented)
 		return
 	}
 
 	if r.Method != "POST" {
-		http.Error(rw, "Not allowed method", http.StatusMethodNotAllowed)
+		manageError(rw, "Not allowed method", http.StatusMethodNotAllowed)
 		return
 	}
 
-	err := r.ParseMultipartForm(0)
-	if err != nil {
-		http.Error(rw, fmt.Sprintf("error on parse data: %s", err.Error()), http.StatusBadRequest)
-		return
-	}
-
-	var decoder = schema.NewDecoder()
 	var user User
-	decoder.Decode(&user, r.PostForm)
-
 	var ur UserResponse
+	var err error
 
-	if r.FormValue("id") != "" {
-		user.ID, _ = strconv.Atoi(r.FormValue("id"))
+	contentType := r.Header.Get("Content-Type")
+
+	if contentType != "application/json" {
+		err = r.ParseMultipartForm(0)
+		if err != nil {
+			manageError(rw, fmt.Sprintf("error on parse form data: %s", err.Error()), http.StatusBadRequest)
+			return
+		}
+
+		var decoder = schema.NewDecoder()
+		decoder.Decode(&user, r.PostForm)
+	} else {
+		log.Println("json parsing...")
+		jdecoder := json.NewDecoder(r.Body)
+		err = jdecoder.Decode(&user)
+		if err != nil {
+			log.Println(err.Error())
+			manageError(rw, fmt.Sprintf("error on parse json data: %s", err.Error()), http.StatusBadRequest)
+			return
+		}
+	}
+
+	log.Println(user)
+
+	if user.ID != 0 {
 		for k := range users {
 			u := &users[k]
 			if u.ID == user.ID {
@@ -197,7 +229,7 @@ func singleUserHandler(rw http.ResponseWriter, r *http.Request) {
 
 	urBody, err := json.Marshal(&ur)
 	if err != nil {
-		http.Error(rw, fmt.Sprintf("error on marshall data response: %s", err.Error()), http.StatusInternalServerError)
+		manageError(rw, fmt.Sprintf("error on marshall data response: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
@@ -210,6 +242,7 @@ func main() {
 	http.HandleFunc("/users/", userHandler)
 	http.HandleFunc("/users", usersHandler)
 	http.HandleFunc("/user", singleUserHandler)
+	log.Println("server running...")
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
