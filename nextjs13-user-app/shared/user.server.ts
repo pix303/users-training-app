@@ -12,9 +12,9 @@ export const getUserDetail = (id: string | undefined): Promise<User> => {
 export async function addUser(data: any): Promise<UserResponse> {
 
     //TODO: fix type prop when not string
-    // if ("id" in data) {
-    //     data.id = parseInt(data.id)
-    // }
+    if ("id" in data) {
+        data.id = parseInt(data.id)
+    }
 
     try {
         const r = await fetch(
