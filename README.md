@@ -1,6 +1,6 @@
 # users-training-app
 
-Training projext to evaluate Nextjs (ver 12 and 13) and Remix
+Training projects to evaluate Nextjs (ver 12 and 13) and Remix
 
 ## server
 Go minimal rest api for serving users data
@@ -27,10 +27,6 @@ TODO:
 
 ## nextjs13-user-app
 App implemented with **Nextjs 13**
-
-TODO:
-- user detail view
-- add/update user
 
 ## remix-user-app
  App implemented with **Remix**
